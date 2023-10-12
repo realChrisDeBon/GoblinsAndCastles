@@ -1,67 +1,134 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using Goblins_and_Castles.Multiplayer;
+using Goblins_and_Castles.WindowScenes;
 using OpenAI_API;
 using OpenAI_API.Chat;
 using Spectre.Console;
+using Terminal.Gui;
 
 namespace Goblins_and_Castles
 {
-
-
     internal class Program
     {
+        static void clear_all(Window thiswindow)
+        {
+            foreach(View view_ in thiswindow.Subviews)
+            {
+                thiswindow.Remove(view_);
+            }
+            try
+            {
+                Application.Shutdown();
+                Application.RequestStop();
+            } catch
+            {
+                // expected exception thrown
+            }
+        }
+
 
         static async Task Main(string[] args)
         {
+            // Set new character intro
+            CharacterIntro newchar = new CharacterIntro();
+
             // Set environment of console
             Console.Title = ("Goblins and Castles");
-            Console.WriteLine("Welcome to Goblins and Castles, the text-based fantasy RPG game!\n");
-
-            // Prompt user to play 1. Solo 2. Join a server 3. Host a server
-            Console.Write("\nPlease choose one of the following:\n1. Solo campaign\n2. Multiplayer campaign (Join)\n3. Multiplayer campaign (Host)\n");
-            bool valid_choice = false;
-            while (valid_choice == false)
+            Terminal.Gui.Application.Init();
+            Window mainWindow = new Window()
             {
-                ConsoleKeyInfo userInput;
-                userInput = Console.ReadKey(true);
-                switch (userInput.KeyChar)
+                Width = Dim.Fill(),
+                Height = Dim.Fill(),
+            };
+            mainWindow.ColorScheme = new ColorScheme()
+            {
+                Normal = Terminal.Gui.Attribute.Make(Terminal.Gui.Color.White, Terminal.Gui.Color.Black),
+                Focus = Terminal.Gui.Attribute.Make(Terminal.Gui.Color.White, Terminal.Gui.Color.Black),
+                HotNormal = Terminal.Gui.Attribute.Make(Terminal.Gui.Color.White, Terminal.Gui.Color.Black),
+                HotFocus = Terminal.Gui.Attribute.Make(Terminal.Gui.Color.White, Terminal.Gui.Color.Black)
+            };
+
+            // Create a welcome label
+            Label welcome_label = new Label()
+            {
+                Text = "Welcome to Goblins and Castles, the text-based fantasy RPG game!",
+                X = Pos.Center(),
+                Y = Pos.Top(mainWindow),
+                Height = 1
+            };
+
+            // Create our menu buttons (4 in total)
+            const int button_space = 4;
+            int buttonspacer = 8;
+            Button choice_solo = new Button()
+            {
+                Text = "Solo campaign",
+                X = Pos.Center(),
+                Y = buttonspacer,
+            };
+            buttonspacer += button_space;
+            choice_solo.Clicked += () =>
+            {
+                newchar.add_elements();
+                while (newchar.is_finished == false)
                 {
-                    case (char)ConsoleKey.D1:
-                        Console.Clear(); // Clear console
-                        SoloPlay solo_campaign = new SoloPlay(); // Initiate solo game
-                        solo_campaign.Start().GetAwaiter().GetResult();
-                        valid_choice = true;
-                        break;
-                    case (char)ConsoleKey.D2:
-                        Console.Clear();
-                        Console.Write("Please enter server IP address: "); // Prompt user for server IP address
-                        string _ip = Console.ReadLine();
-                        ClientSide multi_join = new ClientSide();
-                        // User must create a character before entering a server
-
-                        Console.Clear();
-                       // With a valid character intro and a name, we enter the client side to make connection with server side
-                        CharacterIntro newchar = new CharacterIntro();
-                        newchar.Username = newchar.GetName();
-                        newchar.Race = newchar.GetRace();
-                        newchar.Class = newchar.GetClass();
-                        string character_inventory = newchar.GetInventory();
-                        string[] invslots = character_inventory.Split('\n');
-                        newchar.StartingEquipment = invslots[0];
-                        newchar.InventoryPack = invslots[1];
-                        multi_join.Start(newchar, _ip);
-                        valid_choice = true;
-                        break;
-                    case (char)ConsoleKey.D3:
-                        Console.Clear();
-                        ServerSide multi_host = new ServerSide(); // Initiate server side
-                        multi_host.Start().GetAwaiter().GetResult();
-                        valid_choice = true;
-                        break;
+                    // wait to proceed
                 }
-                if (valid_choice == false) { Console.WriteLine("Invalid selection."); }
+                
+                clear_all(mainWindow);
+                main_GameScene newscene = new main_GameScene();
+                newscene.draw_scene();
+            };
 
+            Button choice_joinmulti = new Button()
+            {
+                Text = "Join server",
+                X = Pos.Center(),
+                Y = buttonspacer,
+            };
+            buttonspacer += button_space;
+            choice_joinmulti.Clicked += () =>
+            {
+                clear_all(mainWindow);
+            };
+
+            Button choice_hostmulti = new Button()
+            {
+                Text = "Host server",
+                X = Pos.Center(),
+                Y = buttonspacer,
+            };
+            buttonspacer += button_space;
+            choice_hostmulti.Clicked += () =>
+            {
+                clear_all(mainWindow);
+            };
+
+            Button choice_settings = new Button()
+            {
+                Text = "Settings",
+                X = Pos.Center(),
+                Y = buttonspacer,
+            };
+            buttonspacer += button_space;
+            choice_settings.Clicked += () =>
+            {
+                clear_all(mainWindow);
+            };
+
+            mainWindow.Add(welcome_label, choice_solo, choice_joinmulti, choice_hostmulti, choice_settings);
+
+            try
+            {
+                Terminal.Gui.Application.Top.Add(mainWindow);
+                Application.Run();
+            } catch
+            {
+                // Expected exception thrown
             }
+
+            
         }
     }
 }
