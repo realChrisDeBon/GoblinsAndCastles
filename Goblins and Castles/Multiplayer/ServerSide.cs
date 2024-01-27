@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+ 
 namespace Goblins_and_Castles.Multiplayer
 {
     public class ServerSide

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Goblins_and_Castles.Multiplayer
-{
+{ 
     public class CharacterIntro
     {
         public string Username { get; set; }
